@@ -3,6 +3,7 @@ package com.udacity.sandwichclub;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -12,30 +13,33 @@ import com.squareup.picasso.Picasso;
 import com.udacity.sandwichclub.model.Sandwich;
 import com.udacity.sandwichclub.utils.JsonUtils;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class DetailActivity extends AppCompatActivity {
 
     public static final String EXTRA_POSITION = "extra_position";
     private static final int DEFAULT_POSITION = -1;
+    @BindView(R.id.also_known_tv)
     TextView mAlsoKnownTv;
+    @BindView(R.id.also_known_as_label)
     TextView mAlsoKnownLabel;
+    @BindView(R.id.place_of_origin_tv)
     TextView mOriginTv;
+    @BindView(R.id.place_of_origin_label)
     TextView mOriginLabel;
+    @BindView(R.id.description_tv)
     TextView mDescriptionTv;
+    @BindView(R.id.ingredients_tv)
     TextView mIngredientTv;
+    @BindView(R.id.image_iv)
     ImageView mSandwichIv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate( savedInstanceState );
         setContentView( R.layout.activity_detail );
-
-        mSandwichIv = findViewById( R.id.image_iv );
-        mAlsoKnownTv = findViewById( R.id.also_known_tv );
-        mAlsoKnownLabel = findViewById( R.id.also_known_as_label );
-        mOriginTv = findViewById( R.id.place_of_origin_tv );
-        mOriginLabel = findViewById( R.id.place_of_origin_label );
-        mDescriptionTv = findViewById( R.id.description_tv );
-        mIngredientTv = findViewById( R.id.ingredients_tv );
+        ButterKnife.bind( this );
 
         Intent intent = getIntent();
         if (intent == null) {
@@ -73,14 +77,7 @@ public class DetailActivity extends AppCompatActivity {
 
     private void populateUI(Sandwich sandwich) {
         if (sandwich.getAlsoKnownAs() != null && sandwich.getAlsoKnownAs().size() > 0) {
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append( sandwich.getAlsoKnownAs().get( 0 ) );
-
-            for (int i = 1; i < sandwich.getAlsoKnownAs().size(); i++) {
-                stringBuilder.append( ", " );
-                stringBuilder.append( sandwich.getAlsoKnownAs().get( i ) );
-            }
-            mAlsoKnownTv.setText( stringBuilder.toString() );
+            mAlsoKnownTv.setText( TextUtils.join( ", ", sandwich.getAlsoKnownAs() ) );
         } else {
             mAlsoKnownTv.setVisibility( View.GONE );
             mAlsoKnownLabel.setVisibility( View.GONE );
@@ -96,20 +93,15 @@ public class DetailActivity extends AppCompatActivity {
         mDescriptionTv.setText( sandwich.getDescription() );
 
         if (sandwich.getIngredients() != null && sandwich.getIngredients().size() > 0) {
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append( "\u2022" );
-            stringBuilder.append( sandwich.getIngredients().get( 0 ) );
-
-            for (int i = 1; i < sandwich.getIngredients().size(); i++) {
-                stringBuilder.append( "\n" );
-                stringBuilder.append( "\u2022" );
-                stringBuilder.append( sandwich.getIngredients().get( i ) );
+            for (int i = 0; i < sandwich.getIngredients().size(); i++) {
+                mIngredientTv.setText( TextUtils.join( "\n \u2022 ", sandwich.getIngredients() ) );
             }
-            mIngredientTv.setText( stringBuilder.toString() );
         }
 
         Picasso.with( this )
                 .load( sandwich.getImage() )
+                .placeholder( R.drawable.no_image_icon )
+                .error( R.drawable.user_placeholder_error )
                 .into( mSandwichIv );
     }
 }
